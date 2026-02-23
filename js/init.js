@@ -8,16 +8,97 @@
 
 (function($) {
 
+	// Dynamically calculate the base path for CSS files
+	// This handles GitHub Pages subdirectories and language folders
+	// Examples:
+	//   index.php.html -> css/ (same level as js/ folder)
+	//   fr/index.php.html -> ../css/ (one level up)
+	//   en/talk/xxx.php.html -> ../../css/ (two levels up)
+	var getBasePath = function() {
+		// Find the path to this script (init.js) using getAttribute to get the original relative path
+		var scripts = document.getElementsByTagName('script');
+		var initScriptPath = '';
+
+		for (var i = 0; i < scripts.length; i++) {
+			// Use getAttribute to get the path as written in HTML (relative), not the resolved absolute URL
+			var src = scripts[i].getAttribute('src');
+			if (src && src.indexOf('init.js') !== -1) {
+				// Extract the directory path
+				// "js/init.js" -> "js/"
+				// "../js/init.js" -> "../js/"
+				// "../../js/init.js" -> "../../js/"
+				var lastSlash = src.lastIndexOf('/');
+				if (lastSlash !== -1) {
+					initScriptPath = src.substring(0, lastSlash + 1);
+					// Replace 'js/' with 'css/'
+					initScriptPath = initScriptPath.replace(/js\/$/, 'css/');
+				}
+				break;
+			}
+		}
+
+		// Fallback: calculate based on current page depth
+		if (!initScriptPath) {
+			var path = window.location.pathname;
+			// Remove filename
+			var dir = path.substring(0, path.lastIndexOf('/'));
+			// Count slashes to determine depth
+			var depth = (dir.match(/\//g) || []).length;
+
+			// We need to account for GitHub Pages subdirectory
+			// Subtract 1 for the repo name itself
+			if (depth > 1) {
+				depth = depth - 1;
+			}
+
+			if (depth === 0 || depth === 1) {
+				return 'css/';
+			}
+
+			var prefix = '';
+			for (var j = 0; j < depth - 1; j++) {
+				prefix += '../';
+			}
+			return prefix + 'css/';
+		}
+
+		return initScriptPath;
+	};
+
+	var cssBasePath = getBasePath();
+
+	// Debug: log the detected path (remove this line after testing)
+	if (window.console && console.log) {
+		console.log('CSS Base Path detected:', cssBasePath);
+		console.log('Current page:', window.location.pathname);
+	}
+
+	// Fix favicon path for GitHub Pages subdirectory
+	// The browser requests /favicon.ico, but we need /2024.foss4g.be/favicon.ico
+	var fixFavicon = function() {
+		var existingIcon = document.querySelector('link[rel~="icon"]');
+		if (!existingIcon) {
+			var link = document.createElement('link');
+			link.rel = 'icon';
+			link.type = 'image/x-icon';
+			// Use the same logic as CSS path: replace js/ with empty string for root
+			var faviconPath = cssBasePath.replace(/css\/$/, 'favicon.ico');
+			link.href = faviconPath;
+			document.head.appendChild(link);
+		}
+	};
+	fixFavicon();
+
 	skel.init({
 		reset: 'full',
 		breakpoints: {
-			global:		{ range: '*', href: '/css/style.css', containers: '60em', grid: { gutters: { vertical: '2em', horizontal: 0 } } },
-			wide:		{ range: '-1680', href: '/css/style-wide.css' },
-			normal:		{ range: '-1280', href: '/css/style-normal.css', grid: { gutters: { vertical: '1.5em' } }, viewport: { scalable: false } },
-			narrow:		{ range: '-980', href: '/css/style-narrow.css', containers: '90%' },
-			narrower:	{ range: '-840', href: '/css/style-narrower.css', grid: { collapse: 1 } },
-			mobile:		{ range: '-640', href: '/css/style-mobile.css', containers: '100%', grid: { gutters: { vertical: '1em' } } },
-			mobilep:	{ range: '-480', href: '/css/style-mobilep.css', grid: { collapse: 2 } }
+			global:		{ range: '*', href: cssBasePath + 'style.css', containers: '60em', grid: { gutters: { vertical: '2em', horizontal: 0 } } },
+			wide:		{ range: '-1680', href: cssBasePath + 'style-wide.css' },
+			normal:		{ range: '-1280', href: cssBasePath + 'style-normal.css', grid: { gutters: { vertical: '1.5em' } }, viewport: { scalable: false } },
+			narrow:		{ range: '-980', href: cssBasePath + 'style-narrow.css', containers: '90%' },
+			narrower:	{ range: '-840', href: cssBasePath + 'style-narrower.css', grid: { collapse: 1 } },
+			mobile:		{ range: '-640', href: cssBasePath + 'style-mobile.css', containers: '100%', grid: { gutters: { vertical: '1em' } } },
+			mobilep:	{ range: '-480', href: cssBasePath + 'style-mobilep.css', grid: { collapse: 2 } }
 		}
 	}, {
 		layers: {

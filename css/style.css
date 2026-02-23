@@ -1330,7 +1330,7 @@
 			#header h1 .foss4g {
 			width:2vw;
 			display:inline-block;
-			 background-image: url(/images/chapeau-melon.svg);
+			 background-image: url(../images/chapeau-melon.svg);
 			 background-size: 3vh;
  			 background-repeat: no-repeat;
 			 background-position: 14px 11px;
@@ -1574,7 +1574,7 @@
 	#banner {
 		background-attachment: scroll, fixed;
 		background-color: #666;
-		background-image: url("images/overlay.png"), url("/images/banner4.jpg");
+		background-image: url("images/overlay.png"), url("../images/banner4.jpg");
 		background-position: top left, center center;
 		background-repeat: repeat, no-repeat;
 		background-size: auto, cover;
@@ -1590,7 +1590,7 @@
 		#banner .foss4g {
 			width:10vw;
 			display:inline-block;
-			 background-image: url(/images/chapeau-melon.svg);
+			 background-image: url(../images/chapeau-melon.svg);
 			 background-size: 20vh;
  			 background-repeat: no-repeat;
 			 background-position: 3vw 0vh;
